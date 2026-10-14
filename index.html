@@ -1,16 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="sv">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: transparent;
+    margin: 0;
+    padding: 10px;
+}
+
+.card {
+    border: 3px solid #D4AF37;
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    background: transparent;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+}
+
+h2 {
+    color: #D4AF37;
+    margin: 0 0 15px;
+    font-size: clamp(20px, 5vw, 30px);
+    line-height: 1.3;
+}
+
+#timer {
+    color: #D4AF37;
+    font-size: clamp(28px, 8vw, 48px);
+    font-weight: bold;
+    margin-bottom: 12px;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    line-height: 1.2;
+}
+
+#nextDate {
+    color: #D4AF37;
+    font-size: clamp(14px, 3.5vw, 18px);
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+
+    .card {
+        padding: 15px;
+        border-width: 2px;
+        border-radius: 15px;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+    }
+
+    #timer {
+        margin-bottom: 10px;
+    }
+}
+
+</style>
 </head>
 
-<body style="text-align:center;padding:50px;">
+<body>
 
-<h1 style="color:gold">
-POKER TIMER TEST
-</h1>
+<div class="card">
 
-<p>GitHub Pages fungerar</p>
+    <h2>♠️ Nästa anmälan öppnar om ♠️</h2>
+
+    <div id="timer"></div>
+
+    <div id="nextDate"></div>
+
+</div>
+
+<script>
+
+// Anmälningsöppningar kl 07:00
+const releaseDates = [
+    new Date("2026-10-17T07:00:00"),
+    new Date("2026-10-31T07:00:00"),
+    new Date("2026-11-14T07:00:00"),
+    new Date("2026-11-28T07:00:00")
+];
+
+function getNextRelease() {
+
+    const now = new Date();
+
+    for (const date of releaseDates) {
+        if (date > now) {
+            return date;
+        }
+    }
+
+    return null;
+}
+
+function formatDate(date) {
+
+    return date.toLocaleDateString("sv-SE", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+    });
+}
+
+function updateTimer() {
+
+    const target = getNextRelease();
+
+    if (!target) {
+
+        document.querySelector("h2").innerHTML =
+            "🏆 FINALEN";
+
+        document.getElementById("timer").innerHTML =
+            "18 DECEMBER";
+
+        document.getElementById("nextDate").innerHTML =
+            "Topp 8 i tabellen kvalificerar sig automatiskt";
+
+        return;
+    }
+
+    const now = new Date();
+    const diff = target - now;
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+
+    document.getElementById("timer").innerHTML =
+        days + " dagar " + hours + " timmar";
+
+    document.getElementById("nextDate").innerHTML =
+        "Nästa öppning: " +
+        formatDate(target) +
+        " kl. 07:00";
+}
+
+updateTimer();
+
+setInterval(updateTimer, 60000);
+
+</script>
 
 </body>
 </html>
