@@ -108,6 +108,8 @@ const releaseDates = [
     new Date("2026-11-28T07:00:00")
 ];
 
+const currentGameEnds = new Date("2026-10-23T23:59:59");
+    
 function getNextRelease() {
 
     const now = new Date();
@@ -132,6 +134,23 @@ function formatDate(date) {
 
 function updateTimer() {
 
+    const now = new Date();
+
+    // Pågående spelomgång
+    if (now < currentGameEnds) {
+
+        document.querySelector("h2").innerHTML =
+            '<span class="spade">♠</span> PÅGÅENDE OMGÅNG <span class="spade">♠</span>';
+
+        document.getElementById("timer").innerHTML =
+            "Anmälan stängd";
+
+        document.getElementById("nextDate").innerHTML =
+            "Nästa anmälan öppnar efter spelkvällen den 23 oktober";
+
+        return;
+    }
+
     const target = getNextRelease();
 
     if (!target) {
@@ -148,20 +167,19 @@ function updateTimer() {
         return;
     }
 
-    const now = new Date();
     const diff = target - now;
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
 
-    if (window.innerWidth < 500) {
+    document.querySelector("h2").innerHTML =
+        '<span class="spade">♠</span> Nästa anmälan öppnar om <span class="spade">♠</span>';
 
+    if (window.innerWidth < 500) {
         document.getElementById("timer").innerHTML =
             days + " dagar<br>" +
             hours + " timmar";
-
     } else {
-
         document.getElementById("timer").innerHTML =
             days + " dagar " +
             hours + " timmar";
