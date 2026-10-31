@@ -127,10 +127,10 @@
          * Lördagen före spelveckan kl. 07.00.
          *
          * Anmälan stänger:
-         * På speldagen kl. 07.00.
+         * På speldagen kl. 19.00.
          *
          * "Pågående omgång" visas alltså fram till
-         * speldagen kl. 06.59.59.
+         * speldagen kl. 18.59.59.
          */
         const rounds = gameDates.map(function (gameDate) {
             const opening = new Date(gameDate);
@@ -138,7 +138,7 @@
             opening.setHours(7, 0, 0, 0);
 
             const closing = new Date(gameDate);
-            closing.setHours(7, 0, 0, 0);
+            closing.setHours(19, 0, 0, 0);
 
             return {
                 gameDate: gameDate,
