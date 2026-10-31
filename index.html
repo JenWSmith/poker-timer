@@ -1,201 +1,326 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-* {
-    box-sizing: border-box;
-}
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: transparent;
+            margin: 0;
+            padding: 10px;
+        }
 
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: transparent;
-    margin: 0;
-    padding: 10px;
-}
+        .card {
+            border: 3px solid #D4AF37;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            background: transparent;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+        }
 
-.card {
-    border: 3px solid #D4AF37;
-    border-radius: 20px;
-    padding: 20px;
-    max-width: 500px;
-    width: 100%;
-    margin: 0 auto;
-    background: transparent;
-    box-shadow: 0 0 15px rgba(212,175,55,0.25);
-}
+        h2 {
+            color: #FFFFFF;
+            margin: 0 0 15px;
+            font-size: clamp(18px, 5vw, 30px);
+            line-height: 1.3;
+        }
 
-h2 {
-    color: #FFFFFF;
-    margin: 0 0 15px;
-    font-size: clamp(18px, 5vw, 30px);
-    line-height: 1.3;
-}
+        .spade {
+            color: #D4AF37;
+            font-size: clamp(0.9em, 4vw, 1.4em);
+            text-shadow:
+                -1px -1px 0 #fff,
+                 1px -1px 0 #fff,
+                -1px  1px 0 #fff,
+                 1px  1px 0 #fff;
+        }
 
-.spade {
-    color: #D4AF37;
-    font-size: clamp(0.9em, 4vw, 1.4em);
-    text-shadow:
-        -1px -1px 0 #fff,
-         1px -1px 0 #fff,
-        -1px  1px 0 #fff,
-         1px  1px 0 #fff;
-}
+        #timer {
+            color: #D4AF37;
+            font-size: clamp(20px, 7vw, 48px);
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+            line-height: 1.3;
+            word-break: break-word;
+        }
 
-#timer {
-    color: #D4AF37;
-    font-size: clamp(20px, 7vw, 48px);
-    font-weight: bold;
-    margin-bottom: 12px;
-    text-shadow: 0 0 10px rgba(212,175,55,0.4);
-    line-height: 1.3;
-    word-break: break-word;
-}
+        #nextDate {
+            color: #FFFFFF;
+            font-size: clamp(14px, 3.5vw, 18px);
+            line-height: 1.4;
+        }
 
-#nextDate {
-    color: #FFFFFF;
-    font-size: clamp(14px, 3.5vw, 18px);
-    line-height: 1.4;
-}
+        @media (max-width: 480px) {
+            .card {
+                padding: 15px;
+                border-width: 2px;
+                border-radius: 15px;
+            }
 
-@media (max-width: 480px) {
+            h2 {
+                margin-bottom: 10px;
+            }
 
-    .card {
-        padding: 15px;
-        border-width: 2px;
-        border-radius: 15px;
-    }
-
-    h2 {
-        margin-bottom: 10px;
-    }
-
-    #timer {
-        margin-bottom: 10px;
-    }
-}
-
-</style>
+            #timer {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="card">
+    <div class="card">
+        <h2 id="heading">
+            <span class="spade">♠</span>
+            Laddar...
+            <span class="spade">♠</span>
+        </h2>
 
-    <h2>
-        <span class="spade">♠</span>
-        Nästa anmälan öppnar om
-        <span class="spade">♠</span>
-    </h2>
+        <div id="timer">Laddar...</div>
 
-    <div id="timer"></div>
+        <div id="nextDate"></div>
+    </div>
 
-    <div id="nextDate"></div>
+    <script>
+        /*
+         * Höstens ordinarie spelomgångar.
+         *
+         * new Date(år, månad, dag)
+         *
+         * JavaScript räknar månader från 0:
+         * 7  = augusti
+         * 8  = september
+         * 9  = oktober
+         * 10 = november
+         * 11 = december
+         */
+        const gameDates = [
+            new Date(2026, 7, 28),
+            new Date(2026, 8, 11),
+            new Date(2026, 8, 25),
+            new Date(2026, 9, 9),
+            new Date(2026, 9, 23),
+            new Date(2026, 10, 6),
+            new Date(2026, 10, 20),
+            new Date(2026, 11, 4)
+        ];
 
-</div>
+        // Final: fredag 18 december 2026
+        const finalDate = new Date(2026, 11, 18);
 
-<script>
+        /*
+         * Skapa öppnings- och stängningstid för varje omgång.
+         *
+         * Anmälan öppnar:
+         * Lördagen före spelveckan kl. 07.00.
+         *
+         * Anmälan stänger:
+         * På speldagen kl. 07.00.
+         *
+         * "Pågående omgång" visas alltså fram till
+         * speldagen kl. 06.59.59.
+         */
+        const rounds = gameDates.map(function (gameDate) {
+            const opening = new Date(gameDate);
+            opening.setDate(opening.getDate() - 6);
+            opening.setHours(7, 0, 0, 0);
 
-// Anpassa dessa datum efter era fyra återstående öppningar
-const releaseDates = [
-    new Date("2026-10-17T07:00:00"),
-    new Date("2026-10-31T07:00:00"),
-    new Date("2026-11-14T07:00:00"),
-    new Date("2026-11-28T07:00:00")
-];
+            const closing = new Date(gameDate);
+            closing.setHours(7, 0, 0, 0);
 
-const currentGameEnds = new Date("2026-11-06T18:59:59");
-    
-function getNextRelease() {
+            return {
+                gameDate: gameDate,
+                opening: opening,
+                closing: closing
+            };
+        });
 
-    const now = new Date();
-
-    for (const date of releaseDates) {
-        if (date > now) {
-            return date;
+        function formatDate(date) {
+            return date.toLocaleDateString("sv-SE", {
+                weekday: "long",
+                day: "numeric",
+                month: "long"
+            });
         }
-    }
 
-    return null;
-}
+        function formatFinalDate(date) {
+            return date.toLocaleDateString("sv-SE", {
+                day: "numeric",
+                month: "long"
+            }).toUpperCase();
+        }
 
-function formatDate(date) {
+        function showCurrentRound(round, heading, timer, nextDate) {
+            heading.innerHTML =
+                '<span class="spade">♠</span> ' +
+                'PÅGÅENDE OMGÅNG ' +
+                '<span class="spade">♠</span>';
 
-    return date.toLocaleDateString("sv-SE", {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-    });
-}
+            timer.textContent = "Anmälan öppen";
 
-function updateTimer() {
+            nextDate.textContent =
+                "Spelas " +
+                formatDate(round.gameDate) +
+                " – anmälan stänger kl. 07.00";
+        }
 
-    const now = new Date();
+        function showCountdown(round, now, heading, timer, nextDate) {
+            const difference =
+                round.opening.getTime() - now.getTime();
 
-    // Pågående spelomgång
-    if (now < currentGameEnds) {
+            const totalMinutes = Math.max(
+                0,
+                Math.floor(difference / (1000 * 60))
+            );
 
-        document.querySelector("h2").innerHTML =
-            '<span class="spade">♠</span> PÅGÅENDE OMGÅNG <span class="spade">♠</span>';
+            const days = Math.floor(
+                totalMinutes / (60 * 24)
+            );
 
-        document.getElementById("timer").innerHTML =
-            "Anmälan öppen";
+            const hours = Math.floor(
+                (totalMinutes % (60 * 24)) / 60
+            );
 
-        document.getElementById("nextDate").innerHTML =
-            "Stänger kl.19 aktuell spelkväll";
+            heading.innerHTML =
+                '<span class="spade">♠</span> ' +
+                'Nästa anmälan öppnar om ' +
+                '<span class="spade">♠</span>';
 
-        return;
-    }
+            if (window.innerWidth < 500) {
+                timer.innerHTML =
+                    days + " dagar<br>" +
+                    hours + " timmar";
+            } else {
+                timer.textContent =
+                    days + " dagar " +
+                    hours + " timmar";
+            }
 
-    const target = getNextRelease();
+            nextDate.textContent =
+                "Nästa öppning: " +
+                formatDate(round.opening) +
+                " kl. 07.00";
+        }
 
-    if (!target) {
+        function showFinal(heading, timer, nextDate) {
+            heading.innerHTML =
+                '<span class="spade">♠</span> ' +
+                'FINALEN ' +
+                '<span class="spade">♠</span>';
 
-        document.querySelector("h2").innerHTML =
-            '<span class="spade">♠</span> FINALEN <span class="spade">♠</span>';
+            timer.textContent =
+                formatFinalDate(finalDate);
 
-        document.getElementById("timer").innerHTML =
-            "18 DECEMBER";
+            nextDate.textContent =
+                "Topp 8 i tabellen kvalificerar sig automatiskt";
+        }
 
-        document.getElementById("nextDate").innerHTML =
-            "Topp 8 i tabellen kvalificerar sig automatiskt";
+        function updateTimer() {
+            const now = new Date();
 
-        return;
-    }
+            const heading =
+                document.getElementById("heading");
 
-    const diff = target - now;
+            const timer =
+                document.getElementById("timer");
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const nextDate =
+                document.getElementById("nextDate");
 
-    document.querySelector("h2").innerHTML =
-        '<span class="spade">♠</span> Nästa anmälan öppnar om <span class="spade">♠</span>';
+            // Extra skydd om något HTML-element saknas.
+            if (!heading || !timer || !nextDate) {
+                console.error(
+                    "Kunde inte hitta heading, timer eller nextDate."
+                );
+                return;
+            }
 
-    if (window.innerWidth < 500) {
-        document.getElementById("timer").innerHTML =
-            days + " dagar<br>" +
-            hours + " timmar";
-    } else {
-        document.getElementById("timer").innerHTML =
-            days + " dagar " +
-            hours + " timmar";
-    }
+            /*
+             * Finns en öppen anmälan just nu?
+             *
+             * Exempel:
+             * 31 oktober 2026 kl. 07.00
+             * till 6 november 2026 kl. 06.59.59.
+             */
+            const currentRound = rounds.find(function (round) {
+                return (
+                    now >= round.opening &&
+                    now < round.closing
+                );
+            });
 
-    document.getElementById("nextDate").innerHTML =
-        "Nästa öppning: " +
-        formatDate(target) +
-        " kl. 07:00";
-}
+            if (currentRound) {
+                showCurrentRound(
+                    currentRound,
+                    heading,
+                    timer,
+                    nextDate
+                );
 
-updateTimer();
+                return;
+            }
 
-setInterval(updateTimer, 60000);
+            // Hitta nästa kommande anmälningsöppning.
+            const nextRound = rounds.find(function (round) {
+                return round.opening > now;
+            });
 
-</script>
+            if (nextRound) {
+                showCountdown(
+                    nextRound,
+                    now,
+                    heading,
+                    timer,
+                    nextDate
+                );
+
+                return;
+            }
+
+            /*
+             * Efter att den sista ordinarie omgångens
+             * anmälan har stängt visas finalinformationen.
+             */
+            showFinal(
+                heading,
+                timer,
+                nextDate
+            );
+        }
+
+        /*
+         * Vänta tills hela HTML-sidan har laddats
+         * innan JavaScript försöker ändra innehållet.
+         */
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                updateTimer();
+
+                // Uppdatera nedräkningen varje minut.
+                setInterval(updateTimer, 60000);
+
+                // Anpassa radbrytningen om mobilen vrids
+                // eller webbläsarfönstret ändrar storlek.
+                window.addEventListener(
+                    "resize",
+                    updateTimer
+                );
+            }
+        );
+    </script>
 
 </body>
 </html>
