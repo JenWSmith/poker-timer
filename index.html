@@ -124,7 +124,7 @@
          * Skapa öppnings- och stängningstid för varje omgång.
          *
          * Anmälan öppnar:
-         * Lördagen före spelveckan kl. 07.00.
+         * Lördagen före spelveckan kl. 12.00.
          *
          * Anmälan stänger:
          * På speldagen kl. 19.00.
@@ -135,7 +135,7 @@
         const rounds = gameDates.map(function (gameDate) {
             const opening = new Date(gameDate);
             opening.setDate(opening.getDate() - 6);
-            opening.setHours(7, 0, 0, 0);
+            opening.setHours(12, 0, 0, 0);
 
             const closing = new Date(gameDate);
             closing.setHours(19, 0, 0, 0);
@@ -173,7 +173,7 @@
             nextDate.textContent =
                 "Spelas " +
                 formatDate(round.gameDate) +
-                " – anmälan stänger kl. 07.00";
+                " – anmälan stänger kl. 19.00";
         }
 
         function showCountdown(round, now, heading, timer, nextDate) {
@@ -211,7 +211,7 @@
             nextDate.textContent =
                 "Nästa öppning: " +
                 formatDate(round.opening) +
-                " kl. 07.00";
+                " kl. 12.00";
         }
 
         function showFinal(heading, timer, nextDate) {
@@ -251,7 +251,7 @@
              * Finns en öppen anmälan just nu?
              *
              * Exempel:
-             * 31 oktober 2026 kl. 07.00
+             * 31 oktober 2026 kl. 12.00
              * till 6 november 2026 kl. 06.59.59.
              */
             const currentRound = rounds.find(function (round) {
